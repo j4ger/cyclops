@@ -1,0 +1,6 @@
+[option]
+exclude_paths = ["ip/.*"]
+prefix_label = ""
+
+[rules]
+lowercamelcase_module = true

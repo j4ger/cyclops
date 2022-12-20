@@ -1,5 +1,3 @@
-NVBOARD_HOME = ./nvboard
-
 TOPNAME = cyclops_top
 NXDC_FILES = cyclops_top.nxdc
 INC_PATH ?=
@@ -22,8 +20,8 @@ $(SRC_AUTO_BIND): $(NXDC_FILES)
 	python3 $(NVBOARD_HOME)/scripts/auto_pin_bind.py $^ $@
 
 # project source
-VSRCS = $(shell find $(abspath ./vsrc) -name "*.v" -or -name "*.sv")
-CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
+VSRCS := cyclops_top.sv
+CSRCS := main.cpp 
 CSRCS += $(SRC_AUTO_BIND)
 
 # rules for NVBoard
@@ -36,6 +34,8 @@ LDFLAGS += -lSDL2 -lSDL2_image
 
 $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
 	@rm -rf $(OBJ_DIR)
+	mkdir $(BUILD_DIR)/obj_dir
+	cp $(CSRCS) $(BUILD_DIR)/obj_dir
 	$(VERILATOR) $(VERILATOR_CFLAGS) \
 		--top-module $(TOPNAME) $^ \
 		$(addprefix -CFLAGS , $(CFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) \

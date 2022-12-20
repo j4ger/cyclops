@@ -9,7 +9,6 @@ module test_plotter #(
     data
 );
 
-  import interfaces::pixel_t;
 
   pixel_t data;
 

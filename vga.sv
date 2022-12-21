@@ -34,9 +34,12 @@ module vga #(
   assign h_sync = current_width > H_FRONTPORCH;
   assign v_sync = current_height > V_FRONTPORCH;
 
-  logic h_in_view = (current_width >= H_ACTIVE) && (current_width < H_BACKPORCH);
-  logic v_in_view = (current_height >= V_FRONTPORCH) && (current_height < V_BACKPORCH);
-  logic in_view = h_in_view && v_in_view;
+  logic h_in_view;
+  assign h_in_view = (current_width >= H_ACTIVE) && (current_width < H_BACKPORCH);
+  logic v_in_view;
+  assign v_in_view = (current_height >= V_FRONTPORCH) && (current_height < V_BACKPORCH);
+  logic in_view;
+  assign in_view = h_in_view && v_in_view;
 
   assign blank = in_view;
 
@@ -62,7 +65,11 @@ module vga #(
       red <= data.red;
       green <= data.green;
       blue <= data.blue;
-    end
+
+      $display("data: %h", data);
+
+      $display("x: %d, y: %d", x_address, y_address);
+    end else $display("x: %d, y: %d, not in view", current_width, current_height);
   end
 endmodule
 

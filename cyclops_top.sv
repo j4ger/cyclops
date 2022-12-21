@@ -13,16 +13,15 @@ module cyclops_top (
     VGA_B
 );
 
-  parameter integer HEIGHT = 640;
-  parameter integer WIDTH = 480;
-
-  pixel_t display_buffer[HEIGHT][WIDTH];
+  pixel_t display_buffer[1048570];
 
   logic [9:0] x_address;
   logic [9:0] y_address;
 
   pixel_t buffer_data;
-  assign buffer_data = display_buffer[y_address][x_address[8:0]];
+  logic [19:0] address;
+  assign address = {y_address, x_address};
+  assign buffer_data = display_buffer[address];
 
   vga vga (
       .clock(clock),
@@ -40,7 +39,8 @@ module cyclops_top (
   );
 
   initial $readmemh("./resources/xiaoke.hex", display_buffer);
-  initial $display(display_buffer);
+
+  initial $display("display_buffer: %h", display_buffer);
 
 endmodule
 

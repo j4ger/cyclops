@@ -20,6 +20,7 @@ $(SRC_AUTO_BIND): $(NXDC_FILES)
 	python3 $(NVBOARD_HOME)/scripts/auto_pin_bind.py $^ $@
 
 # project source
+PRJSRC := $(shell find $(abspath .) -name "*.v" -or -name "*.sv")
 VSRCS := cyclops_top.sv
 CSRCS := main.cpp 
 CSRCS += $(SRC_AUTO_BIND)
@@ -32,12 +33,12 @@ INCFLAGS = $(addprefix -I, $(INC_PATH))
 CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
 LDFLAGS += -lSDL2 -lSDL2_image
 
-$(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
+$(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE) $(PRJSRC)
 	@rm -rf $(OBJ_DIR)
 	mkdir $(BUILD_DIR)/obj_dir
 	cp $(CSRCS) $(BUILD_DIR)/obj_dir
 	$(VERILATOR) $(VERILATOR_CFLAGS) \
-		--top-module $(TOPNAME) $^ \
+		--top-module $(TOPNAME) $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE) \
 		$(addprefix -CFLAGS , $(CFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) \
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 

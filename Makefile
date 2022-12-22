@@ -33,7 +33,7 @@ INCFLAGS = $(addprefix -I, $(INC_PATH))
 CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
 LDFLAGS += -lSDL2 -lSDL2_image
 
-$(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE) $(PRJSRC)
+$(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE) $(PRJSRC) ./resources/
 	@rm -rf $(OBJ_DIR)
 	mkdir $(BUILD_DIR)/obj_dir
 	cp $(CSRCS) $(BUILD_DIR)/obj_dir

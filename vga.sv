@@ -28,48 +28,37 @@ module vga #(
 
 );
 
-  logic [ $clog2(H_WIDTH)-1:0] current_width;
-  logic [$clog2(V_HEIGHT)-1:0] current_height;
+  logic [9:0] x_cnt, y_cnt;
+  logic h_valid, v_valid;
 
-  assign h_sync = current_width > H_FRONTPORCH;
-  assign v_sync = current_height > V_FRONTPORCH;
-
-  logic h_in_view;
-  assign h_in_view = (current_width >= H_ACTIVE) && (current_width < H_BACKPORCH);
-  logic v_in_view;
-  assign v_in_view = (current_height >= V_FRONTPORCH) && (current_height < V_BACKPORCH);
-  logic in_view;
-  assign in_view = h_in_view && v_in_view;
-
-  assign blank = in_view;
-
-  assign target_clock = ~clock;
-
-  always_ff @(posedge clock or posedge reset) begin
-    if (reset) begin
-      current_width  <= 0;
-      current_height <= 0;
+  always @(posedge clock) begin
+    if (reset == 1'b1) begin
+      x_cnt <= 1;
+      y_cnt <= 1;
     end else begin
-      if (current_width == H_WIDTH) begin
-        current_width <= 1;
-
-        if (current_height == V_HEIGHT) current_height <= 1;
-        else current_height <= current_height + 1;
-
-      end else current_width <= current_width + 1;
+      if (x_cnt == H_WIDTH) begin
+        x_cnt <= 1;
+        if (y_cnt == V_HEIGHT) y_cnt <= 1;
+        else y_cnt <= y_cnt + 1;
+      end else x_cnt <= x_cnt + 1;
     end
-
-    if (in_view) begin
-      x_address <= current_width - H_ACTIVE - 1;
-      y_address <= current_height - V_ACTIVE - 1;
-      red <= data.red;
-      green <= data.green;
-      blue <= data.blue;
-
-      $display("data: %h", data);
-
-      $display("x: %d, y: %d", x_address, y_address);
-    end else $display("x: %d, y: %d, not in view", current_width, current_height);
   end
+
+  assign h_sync = (x_cnt > H_FRONTPORCH);
+  assign v_sync = (y_cnt > V_FRONTPORCH);
+
+  assign h_valid = (x_cnt > H_ACTIVE) & (x_cnt <= H_BACKPORCH);
+  assign v_valid = (y_cnt > V_ACTIVE) & (y_cnt <= V_BACKPORCH);
+  assign blank = h_valid & v_valid;
+
+  assign x_address = h_valid ? (x_cnt - 10'd145) : 10'd0;
+  assign y_address = v_valid ? (y_cnt - 10'd36) : 10'd0;
+
+  assign red = data.red;
+  assign green = data.green;
+  assign blue = data.blue;
+
 endmodule
+
+
 

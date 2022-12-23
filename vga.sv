@@ -18,6 +18,7 @@ module vga #(
     v_sync,
     target_clock,
     blank,
+    frame_complete,
 
     output [7:0] red,
     green,
@@ -43,6 +44,10 @@ module vga #(
       end else x_cnt <= x_cnt + 1;
     end
   end
+
+  assign frame_complete = (x_cnt == H_WIDTH) & (y_cnt == V_HEIGHT);
+
+  assign target_clock = ~clock;
 
   assign h_sync = (x_cnt > H_FRONTPORCH);
   assign v_sync = (y_cnt > V_FRONTPORCH);

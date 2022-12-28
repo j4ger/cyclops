@@ -1,7 +1,7 @@
 module test_plotter #(
-    parameter integer MAX = 200,
-    parameter integer HEIGHT = 480,
-    parameter integer WIDTH = 640
+    parameter int MAX = 200,
+    parameter int HEIGHT = 480,
+    parameter int WIDTH = 640
 ) (
     input clock,
     reset,

@@ -1,5 +1,6 @@
 // port a: read only, routes to current_buffer
 // port b: read-write, routes to the-other-buffer
+// reading/writing takes one cycle for the result to become stable
 module display_buffer_mux (
     input clock,
     reset,
@@ -43,6 +44,11 @@ module display_buffer_mux (
   // switching logic
   always_ff @(posedge clock or posedge reset) begin
     if (reset) current_buffer <= 0;
-    else if (frame_complete) current_buffer <= ~current_buffer;
+    else if (frame_complete) begin
+      // buffer clear mechanism
+      //      if (current_buffer) display_buffer_2 <= '{default: 0};
+      //      else display_buffer_1 <= '{default: 0};
+      current_buffer <= ~current_buffer;
+    end
   end
 endmodule

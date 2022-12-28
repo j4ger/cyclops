@@ -34,18 +34,18 @@ module multiplier #(
       cache_b <= 0;
     end else begin
       state <= next_state;
+
+      case (state)
+        read_input: begin
+          cache_a <= a;
+          cache_b <= b;
+        end
+        calculate: c <= cache_a * cache_b;
+        default: begin
+        end
+      endcase
+
     end
-
-    case (state)
-      read_input: begin
-        cache_a <= a;
-        cache_b <= b;
-      end
-      calculate: c <= cache_a * cache_b;
-      default: begin
-      end
-    endcase
-
   end
 
   always_comb begin

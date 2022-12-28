@@ -3,7 +3,7 @@
 // port b for read only, reads from first slot till last
 // read cursor resets on reset signal
 module object_buffer #(
-    parameter integer SIZE = 50
+    parameter int SIZE = 50
 ) (
     input clock,
     reset,

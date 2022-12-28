@@ -1,9 +1,11 @@
-`include "pixel.sv"
+`include "common.sv"
 // provides buffer for rasterizers
 // provides [written] signal to indicate a buffer is ready for further writes
 // for each data, read from display buffer and compare depth, if current data
 // has greater depth, write to display buffer
-module depth_comparator #(
+module depth_comparator
+  import common::*;
+#(
     parameter logic [7:0] UNITS = 16
 ) (
     input clock,

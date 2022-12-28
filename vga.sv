@@ -1,4 +1,7 @@
-module vga #(
+`include "common.sv"
+module vga
+  import common::*;
+#(
     parameter logic [9:0] H_WIDTH = 800,
     logic [9:0]    H_ACTIVE = 144,
     logic [9:0]    H_FRONTPORCH = 96,
@@ -32,8 +35,8 @@ module vga #(
   logic [9:0] x_cnt, y_cnt;
   logic h_valid, v_valid;
 
-  always @(posedge clock) begin
-    if (reset == 1'b1) begin
+  always @(posedge clock or posedge reset) begin
+    if (reset) begin
       x_cnt <= 1;
       y_cnt <= 1;
     end else begin

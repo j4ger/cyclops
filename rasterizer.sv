@@ -1,7 +1,8 @@
-`include "object.sv"
-`include "pixel.sv"
+`include "common.sv"
 // each rasterizer scans pixels whose vertical coordinate ranges from X_RANGE_START to X_RANGE_END
-module rasterizer #(
+module rasterizer
+  import common::*;
+#(
     parameter logic [9:0] X_RANGE_START=0,
     logic[9:0]    X_RANGE_END=30,
     logic [9:0] HEIGHT=480

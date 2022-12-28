@@ -1,7 +1,10 @@
+`include "common.sv"
 // port a: read only, routes to current_buffer
 // port b: read-write, routes to the-other-buffer
 // reading/writing takes one cycle for the result to become stable
-module display_buffer_mux (
+module display_buffer_mux
+  import common::*;
+(
     input clock,
     reset,
 
@@ -15,7 +18,9 @@ module display_buffer_mux (
     input pixel_t write_data_b,
     output pixel_t data_b,
 
-    input frame_complete
+    input  vga_frame_complete,
+    object_buffer_read_end,
+    output next_frame
 );
 
   pixel_t display_buffer_1[524288];
@@ -41,10 +46,12 @@ module display_buffer_mux (
     end
   end
 
+  assign next_frame = vga_frame_complete & object_buffer_read_end;
+
   // switching logic
   always_ff @(posedge clock or posedge reset) begin
     if (reset) current_buffer <= 0;
-    else if (frame_complete) begin
+    else if (next_frame) begin
       // buffer clear mechanism
       //      if (current_buffer) display_buffer_2 <= '{default: 0};
       //      else display_buffer_1 <= '{default: 0};

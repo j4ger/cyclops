@@ -1,4 +1,3 @@
-`include "object.sv"
 module task_dispatcher #(
     parameter logic [7:0] UNITS = 16
 ) (

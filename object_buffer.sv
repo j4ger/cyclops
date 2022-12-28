@@ -1,4 +1,3 @@
-`include "object.sv"
 // port a for write only, writes to next available slot
 // port b for read only, reads from first slot till last
 // read cursor resets on reset signal
@@ -43,8 +42,16 @@ module object_buffer #(
         read_cursor <= read_cursor + 1;  // should read before setting read_b signal
       end
     end
-
   end
 
+  initial begin
+    mem[0] = '{
+        a: '{x: 10, y: 10},
+        b: '{x: 100, y: 15},
+        c: '{x: 50, y: 75},
+        color: '{red: 100, green: 100, blue: 100},
+        depth: 1
+    };
+  end
 
 endmodule

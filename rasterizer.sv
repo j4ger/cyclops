@@ -3,9 +3,9 @@
 module rasterizer
   import common::*;
 #(
-    parameter logic [9:0] X_RANGE_START=0,
-    logic[9:0]    X_RANGE_END=30,
-    logic [9:0] HEIGHT=480
+    parameter int X_RANGE_START = 0,
+    int X_RANGE_END = 29,
+    logic [9:0] HEIGHT = 480
 ) (
     input clock,
     reset,
@@ -20,7 +20,10 @@ module rasterizer
 );
 
   logic [9:0] current_x, current_y;
-  assign task_complete = (current_x == X_RANGE_END) & (state == complete);
+  assign task_complete =
+      (current_x == X_RANGE_END[9:0])
+      & (current_y == HEIGHT)
+      & ((state == complete)|(state==idle));
 
   typedef enum {
     idle,
@@ -66,7 +69,7 @@ module rasterizer
 
   always_ff @(posedge clock or posedge reset) begin
     if (reset) begin
-      current_x <= X_RANGE_START;
+      current_x <= X_RANGE_START[9:0];
       current_y <= 0;
       state <= calc_s1;
       s1 <= 0;
@@ -83,6 +86,11 @@ module rasterizer
       state <= next_state;
 
       if (output_written) written <= 1;
+
+      if (next_task) begin
+        current_x <= X_RANGE_START[9:0];
+        current_y <= 0;
+      end
 
       case (state)
         default: begin
@@ -136,10 +144,12 @@ module rasterizer
             written <= 0;
           end
           // increase pixel count
-          if (current_y == HEIGHT) begin
-            current_y <= 0;
-            if (current_x != X_RANGE_END) current_x <= current_x + 1;
-          end else current_y <= current_y + 1;
+          if (!task_complete) begin
+            if (current_y == HEIGHT) begin
+              current_y <= 0;
+              if (current_x != X_RANGE_END[9:0]) current_x <= current_x + 1;
+            end else current_y <= current_y + 1;
+          end
         end
       endcase
     end

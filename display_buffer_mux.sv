@@ -19,7 +19,7 @@ module display_buffer_mux
     output pixel_t data_b,
 
     input  vga_frame_complete,
-    object_buffer_read_end,
+    tasks_complete,
     output next_frame
 );
 
@@ -46,7 +46,7 @@ module display_buffer_mux
     end
   end
 
-  assign next_frame = vga_frame_complete & object_buffer_read_end;
+  assign next_frame = vga_frame_complete & tasks_complete;
 
   // switching logic
   always_ff @(posedge clock or posedge reset) begin

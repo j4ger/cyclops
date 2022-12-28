@@ -1,7 +1,10 @@
+`include "common.sv"
 // port a for write only, writes to next available slot
 // port b for read only, reads from first slot till last
 // read cursor resets on reset signal
-module object_buffer #(
+module object_buffer
+  import common::*;
+#(
     parameter int SIZE = 50
 ) (
     input clock,

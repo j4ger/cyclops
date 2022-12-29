@@ -9,7 +9,7 @@ module object_buffer
 ) (
     input clock,
     reset,
-    next_frame,
+    switch_buffer,
 
     input object_t data_a,
     input write_a,
@@ -39,7 +39,7 @@ module object_buffer
       // write_cursor<=0;
       read_cursor <= 0;
       read_b_prev <= 0;
-    end else if (next_frame) begin
+    end else if (switch_buffer) begin
       read_cursor <= 0;
     end else begin
       if (write_a) begin

@@ -13,6 +13,7 @@ module rasterizer
     input object_t current_task,
     input next_task,
     input output_written,
+    input switch_buffer,
 
     output pixel_info_t data_out,
     output data_write,
@@ -88,8 +89,7 @@ module rasterizer
 
       if (output_written) written <= 1;
 
-      if (next_task) begin
-        $display("==============new task==============");
+      if (next_task || switch_buffer) begin
         task_complete <= 0;
         current_x <= X_RANGE_START[9:0];
         current_y <= 0;
@@ -143,10 +143,6 @@ module rasterizer
           // write result if needed
           if (in_triangle & written) begin
             //           $display("writing");
-            if (current_x == 50 && current_y == 0) begin
-              $display("s:%d,d:%d,t:%d,sum_st:%d", s, d, t, sum_st);
-              $display("d>0:%d,sum_st>0:%d,s>0:%d", d > 0, sum_st > 0, s > 0);
-            end
             data_write <= 1;
             data_out <= '{
                 x: current_x,
@@ -176,7 +172,7 @@ module rasterizer
   always_comb begin
     unique case (state)
       default: next_state = idle;
-      idle: next_state = next_task ? calc_s1 : idle;
+      idle: next_state = (next_task || switch_buffer) ? calc_s1 : idle;
       calc_s1: next_state = multiplier_complete ? calc_s2 : calc_s1;
       calc_s2: next_state = multiplier_complete ? calc_t1 : calc_s2;
       calc_t1: next_state = multiplier_complete ? calc_t2 : calc_t1;

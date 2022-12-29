@@ -3,9 +3,10 @@ NXDC_FILES = cyclops_top.nxdc
 INC_PATH ?=
 
 VERILATOR = verilator
-VERILATOR_CFLAGS += -MMD --build -cc  \
+VERILATOR_CFLAGS += -MMD --build -cc \
 				-O3 --x-assign fast --x-initial fast --noassert \
-				--trace --trace-params --trace-structs --trace-underscore
+				--trace --trace-underscore
+#				--trace-structs
 
 BUILD_DIR = ./build
 OBJ_DIR = $(BUILD_DIR)/obj_dir
@@ -50,5 +51,6 @@ run: $(BIN)
 
 clean:
 	rm -rf $(BUILD_DIR)
+	rm dump.vcd
 
 .PHONY: default all clean run

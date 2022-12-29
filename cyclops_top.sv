@@ -79,7 +79,7 @@ module cyclops_top
   object_buffer object_buffer (
       .clock(clock),
       .reset(reset),
-      .next_frame(switch_buffer),
+      .switch_buffer(switch_buffer),
       .data_a(ob_data_a),
       .write_a(ob_write_a),
       .read_b(next_task),
@@ -123,6 +123,7 @@ module cyclops_top
           .current_task(ob_data_b),
           .next_task(next_task),
           .output_written(dc_written[i]),
+          .switch_buffer(switch_buffer),
           .data_out(dc_input_data[i]),
           .data_write(dc_input_valid[i]),
           .task_complete(task_complete[i])

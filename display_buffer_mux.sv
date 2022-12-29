@@ -51,7 +51,6 @@ module display_buffer_mux
       // buffer clear mechanism
       //      if (current_buffer) display_buffer_2 <= '{default: 0};
       //      else display_buffer_1 <= '{default: 0};
-      $display("buffer switched");
       current_buffer <= ~current_buffer;
     end
   end

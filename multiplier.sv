@@ -24,7 +24,7 @@ module multiplier #(
 
   logic signed [WIDTH:0] cache_a, cache_b;
 
-  assign valid = state == calculate;
+  assign valid = state == write_output;
 
   always_ff @(posedge clock or posedge reset) begin
     if (reset) begin
@@ -49,7 +49,6 @@ module multiplier #(
   end
 
   always_comb begin
-    next_state = state;
     case (state)
       default: next_state = state;
       read_input:

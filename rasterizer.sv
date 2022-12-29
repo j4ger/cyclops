@@ -31,24 +31,26 @@ module rasterizer
     calc_t2 = 4,
     calc_d1 = 5,
     calc_d2 = 6,
-    calc_complete = 7,
-    complete = 8
+    wait_for_d2 = 7,
+    calc_complete = 8,
+    complete = 9
   } rasterizer_state_t;
 
   rasterizer_state_t state, next_state;
 
   logic multiplier_start, multiplier_complete;
 
-  assign multiplier_start = (state != idle) && (state != complete) && (state != calc_complete);
+  assign multiplier_start = (state != idle) && (state != complete);
 
-  logic signed [21:0] s, d, t, s1, s2, d1, d2, t1, t2;
+  logic signed [21:0] s, d, t, s1, s2, d1, d2, t1, t2, sum_st;
 
   assign s = s1 - s2;
   assign d = d1 - d2;
   assign t = t1 - t2;
+  assign sum_st = s + t;
 
   logic in_triangle;
-  assign in_triangle = (s > 0 == d > 0) & (d < 0) & (s + t < 0);
+  assign in_triangle = (s > 0 == t > 0) && (d > 0 == sum_st > 0);
 
   logic signed [10:0] mul_a, mul_b;
   logic signed [21:0] mul_c;
@@ -137,10 +139,14 @@ module rasterizer
           if (cursor_at_end) task_complete <= 1;
         end
         complete: begin
-          $display("setting output for (%d, %d)", current_x, current_y);
+          //          $display("setting output for (%d, %d)", current_x, current_y);
           // write result if needed
-          if (in_triangle & output_written) begin
-            $display("writing");
+          if (in_triangle & written) begin
+            //           $display("writing");
+            if (current_x == 50 && current_y == 0) begin
+              $display("s:%d,d:%d,t:%d,sum_st:%d", s, d, t, sum_st);
+              $display("d>0:%d,sum_st>0:%d,s>0:%d", d > 0, sum_st > 0, s > 0);
+            end
             data_write <= 1;
             data_out <= '{
                 x: current_x,
@@ -153,7 +159,7 @@ module rasterizer
                 }
             };
             written <= 0;
-          end
+          end else data_write <= 0;
           // move cursor
           if (!cursor_at_end) begin
             if (current_y == HEIGHT) begin
@@ -176,7 +182,8 @@ module rasterizer
       calc_t1: next_state = multiplier_complete ? calc_t2 : calc_t1;
       calc_t2: next_state = multiplier_complete ? calc_d1 : calc_t2;
       calc_d1: next_state = multiplier_complete ? calc_d2 : calc_d1;
-      calc_d2: next_state = multiplier_complete ? calc_complete : calc_d2;
+      calc_d2: next_state = multiplier_complete ? wait_for_d2 : calc_d2;
+      wait_for_d2: next_state = multiplier_complete ? calc_complete : wait_for_d2;
       calc_complete: next_state = complete;
       complete: next_state = (!written) ? complete : (task_complete ? idle : calc_s1);
     endcase

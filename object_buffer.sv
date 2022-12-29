@@ -26,9 +26,10 @@ module object_buffer
   logic [$clog2(SIZE)-1:0] read_cursor;
 
   assign full = write_cursor == SIZE[$clog2(SIZE)-1:0];
-  assign read_end = write_cursor == read_cursor;
+  assign read_end = write_cursor - 1 == read_cursor;
 
   assign data_b = mem[read_cursor];
+  logic read_b_prev;
 
   always_ff @(posedge clock or posedge reset) begin
     if (reset) begin
@@ -37,6 +38,7 @@ module object_buffer
       // cursor must not be reset
       // write_cursor<=0;
       read_cursor <= 0;
+      read_b_prev <= 0;
     end else if (next_frame) begin
       read_cursor <= 0;
     end else begin
@@ -44,10 +46,11 @@ module object_buffer
         mem[write_cursor] <= data_a;
         write_cursor <= write_cursor + 1;
       end
-      if (read_b) begin
+      if (read_b && (!read_b_prev)) begin
         read_cursor <= read_cursor + 1;  // should read before setting read_b signal
       end
     end
+    read_b_prev <= read_b;
   end
 
   initial begin
@@ -59,10 +62,10 @@ module object_buffer
         depth: 1
     };
     mem[1] = '{
-        a: '{x: 1, y: 1},
-        b: '{x: 10, y: 1},
-        c: '{x: 1, y: 10},
-        color: '{red: 150, green: 150, blue: 150},
+        a: '{x: 500, y: 100},
+        b: '{x: 600, y: 100},
+        c: '{x: 600, y: 300},
+        color: '{red: 7, green: 88, blue: 48},
         depth: 2
     };
     write_cursor = 2;

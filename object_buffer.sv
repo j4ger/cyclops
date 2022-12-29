@@ -32,8 +32,11 @@ module object_buffer
 
   always_ff @(posedge clock or posedge reset) begin
     if (reset) begin
-      write_cursor <= 0;
-      read_cursor  <= 0;
+      // in reality we would want to reset write cursor, but in testing
+      // environment initial value is written before reset, therefore write
+      // cursor must not be reset
+      // write_cursor<=0;
+      read_cursor <= 0;
     end else if (next_frame) begin
       read_cursor <= 0;
     end else begin
@@ -55,7 +58,14 @@ module object_buffer
         color: '{red: 100, green: 100, blue: 100},
         depth: 1
     };
-    write_cursor = 1;
+    mem[1] = '{
+        a: '{x: 1, y: 1},
+        b: '{x: 10, y: 1},
+        c: '{x: 1, y: 10},
+        color: '{red: 150, green: 150, blue: 150},
+        depth: 2
+    };
+    write_cursor = 2;
   end
 
 endmodule

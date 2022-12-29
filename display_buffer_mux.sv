@@ -18,9 +18,7 @@ module display_buffer_mux
     input pixel_t write_data_b,
     output pixel_t data_b,
 
-    input  vga_frame_complete,
-    tasks_complete,
-    output next_frame
+    input switch_buffer
 );
 
   pixel_t display_buffer_1[524288];
@@ -46,15 +44,14 @@ module display_buffer_mux
     end
   end
 
-  assign next_frame = vga_frame_complete & tasks_complete;
-
   // switching logic
   always_ff @(posedge clock or posedge reset) begin
     if (reset) current_buffer <= 0;
-    else if (next_frame) begin
+    else if (switch_buffer) begin
       // buffer clear mechanism
       //      if (current_buffer) display_buffer_2 <= '{default: 0};
       //      else display_buffer_1 <= '{default: 0};
+      $display("buffer switched");
       current_buffer <= ~current_buffer;
     end
   end

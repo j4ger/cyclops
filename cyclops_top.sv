@@ -21,7 +21,7 @@ module cyclops_top
   logic [9:0] dbm_address_a_x, dbm_address_a_y, dbm_address_b_x, dbm_address_b_y;
   pixel_t dbm_data_a, dbm_data_b, dbm_write_data_b;
   logic dbm_write_enable_b;
-  logic vga_frame_complete, next_frame, tasks_complete;
+  logic vga_frame_complete, switch_buffer;
 
   display_buffer_mux display_buffer_mux (
       .clock(clock),
@@ -34,9 +34,7 @@ module cyclops_top
       .data_b(dbm_data_b),
       .write_data_b(dbm_write_data_b),
       .write_enable_b(dbm_write_enable_b),
-      .vga_frame_complete(vga_frame_complete),
-      .tasks_complete(tasks_complete),
-      .next_frame(next_frame)
+      .switch_buffer(switch_buffer)
   );
 
   vga vga (
@@ -81,7 +79,7 @@ module cyclops_top
   object_buffer object_buffer (
       .clock(clock),
       .reset(reset),
-      .next_frame(next_frame),
+      .next_frame(switch_buffer),
       .data_a(ob_data_a),
       .write_a(ob_write_a),
       .read_b(next_task),
@@ -108,8 +106,9 @@ module cyclops_top
       .read_end(object_buffer_read_end),
       .task_complete(task_complete),
       .depth_comparator_write_complete(dc_all_complete),
+      .vga_complete(vga_frame_complete),
       .next_task(next_task),
-      .tasks_complete(tasks_complete)
+      .switch_buffer(switch_buffer)
   );
 
   generate

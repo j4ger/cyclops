@@ -39,7 +39,7 @@ module rasterizer
 
   logic multiplier_start, multiplier_complete;
 
-  assign multiplier_start = (state != idle) || (state != complete) || (state != calc_complete);
+  assign multiplier_start = (state != idle) && (state != complete) && (state != calc_complete);
 
   logic signed [21:0] s, d, t, s1, s2, d1, d2, t1, t2;
 
@@ -87,6 +87,7 @@ module rasterizer
       if (output_written) written <= 1;
 
       if (next_task) begin
+        $display("==============new task==============");
         task_complete <= 0;
         current_x <= X_RANGE_START[9:0];
         current_y <= 0;

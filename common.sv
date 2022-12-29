@@ -31,5 +31,21 @@ package common;
     logic [9:0] x, y;
     pixel_t pixel;
   } pixel_info_t;
+
+  task automatic log_vertex(input vertex_t vertex, input string name);
+    $display("  vertex %s:, x: %d, y: %d", name, vertex.x, vertex.y);
+  endtask
+  task automatic log_object(input object_t object);
+    $display("object:");
+    log_vertex(object.a, "a");
+    log_vertex(object.b, "b");
+    log_vertex(object.c, "c");
+    $display("  color: %h", object.color);
+  endtask
+  task automatic log_pixel(input pixel_t pixel);
+    $display("pixel: r: %h, g: %h, b: %h, depth: %d", pixel.red, pixel.green, pixel.blue,
+             pixel.depth);
+  endtask
+
 endpackage
 `endif

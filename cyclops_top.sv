@@ -15,7 +15,7 @@ module cyclops_top
     VGA_B
 );
 
-  localparam logic [7:0] UNITS = 16;
+  localparam logic [7:0] UNITS = 1;
   localparam int STEP = 640 / {24'b0, UNITS};
 
   logic [9:0] dbm_address_a_x, dbm_address_a_y, dbm_address_b_x, dbm_address_b_y;
@@ -59,7 +59,9 @@ module cyclops_top
   logic [UNITS -1:0] dc_input_valid, dc_written;
   logic dc_all_complete;
 
-  depth_comparator depth_comparator (
+  depth_comparator #(
+      .UNITS(UNITS)
+  ) depth_comparator (
       .clock(clock),
       .reset(reset),
       .input_data(dc_input_data),
@@ -98,11 +100,15 @@ module cyclops_top
 
   logic [UNITS-1:0] task_complete;
 
-  task_dispatcher task_dispatcher (
+  task_dispatcher #(
+      .UNITS(UNITS)
+  ) task_dispatcher (
+      .clock(clock),
+      .reset(reset),
       .read_end(object_buffer_read_end),
       .task_complete(task_complete),
       .depth_comparator_write_complete(dc_all_complete),
-      .next_object(next_task),
+      .next_task(next_task),
       .tasks_complete(tasks_complete)
   );
 

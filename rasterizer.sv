@@ -5,7 +5,7 @@ module rasterizer
 #(
     parameter int X_RANGE_START = 0,
     int X_RANGE_END = 29,
-    logic [9:0] HEIGHT = 480
+    logic [9:0] HEIGHT = 479
 ) (
     input clock,
     reset,
@@ -20,28 +20,26 @@ module rasterizer
 );
 
   logic [9:0] current_x, current_y;
-  assign task_complete =
-      (current_x == X_RANGE_END[9:0])
-      & (current_y == HEIGHT)
-      & ((state == complete)|(state==idle));
+  logic cursor_at_end;
+  assign cursor_at_end = (current_x == X_RANGE_END[9:0]) && (current_y == HEIGHT);
 
   typedef enum {
-    idle,
-    calc_s1,
-    calc_s2,
-    calc_t1,
-    calc_t2,
-    calc_d1,
-    calc_d2,
-    calc_complete,
-    complete
+    idle = 0,
+    calc_s1 = 1,
+    calc_s2 = 2,
+    calc_t1 = 3,
+    calc_t2 = 4,
+    calc_d1 = 5,
+    calc_d2 = 6,
+    calc_complete = 7,
+    complete = 8
   } rasterizer_state_t;
 
   rasterizer_state_t state, next_state;
 
   logic multiplier_start, multiplier_complete;
 
-  assign multiplier_start = (state != idle) | (state != complete);
+  assign multiplier_start = (state != idle) || (state != complete) || (state != calc_complete);
 
   logic signed [21:0] s, d, t, s1, s2, d1, d2, t1, t2;
 
@@ -82,12 +80,14 @@ module rasterizer
       mul_b <= 0;
       data_write <= 0;
       written <= 1;
+      task_complete <= 0;
     end else begin
       state <= next_state;
 
       if (output_written) written <= 1;
 
       if (next_task) begin
+        task_complete <= 0;
         current_x <= X_RANGE_START[9:0];
         current_y <= 0;
       end
@@ -95,9 +95,14 @@ module rasterizer
       case (state)
         default: begin
         end
-        idle: data_write <= 0;
-        calc_s1: begin
+        idle: begin
+          //          $display("idle, task_complete: %d, x: %d, y: %d, next_task:%d", task_complete, current_x,
+          //                   current_y, next_task);
           data_write <= 0;
+        end
+        calc_s1: begin
+          //          $display("calc s1");
+          //          log_object(current_task);
           mul_a <= current_task.a.x - current_task.c.x;
           mul_b <= current_y - current_task.c.y;
         end
@@ -126,10 +131,15 @@ module rasterizer
           mul_b <= current_x - current_task.b.x;
           d1 <= mul_c;
         end
-        calc_complete: d2 <= mul_c;
+        calc_complete: begin
+          d2 <= mul_c;
+          if (cursor_at_end) task_complete <= 1;
+        end
         complete: begin
+          $display("setting output for (%d, %d)", current_x, current_y);
           // write result if needed
           if (in_triangle & output_written) begin
+            $display("writing");
             data_write <= 1;
             data_out <= '{
                 x: current_x,
@@ -143,11 +153,11 @@ module rasterizer
             };
             written <= 0;
           end
-          // increase pixel count
-          if (!task_complete) begin
+          // move cursor
+          if (!cursor_at_end) begin
             if (current_y == HEIGHT) begin
               current_y <= 0;
-              if (current_x != X_RANGE_END[9:0]) current_x <= current_x + 1;
+              current_x <= current_x + 1;
             end else current_y <= current_y + 1;
           end
         end
@@ -157,7 +167,6 @@ module rasterizer
   end
 
   always_comb begin
-    next_state = idle;
     unique case (state)
       default: next_state = idle;
       idle: next_state = next_task ? calc_s1 : idle;
@@ -168,11 +177,8 @@ module rasterizer
       calc_d1: next_state = multiplier_complete ? calc_d2 : calc_d1;
       calc_d2: next_state = multiplier_complete ? calc_complete : calc_d2;
       calc_complete: next_state = complete;
-      complete: next_state = written ? complete : (task_complete ? idle : calc_s1);
+      complete: next_state = (!written) ? complete : (task_complete ? idle : calc_s1);
     endcase
-
   end
-
-
 
 endmodule

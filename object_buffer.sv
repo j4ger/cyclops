@@ -55,6 +55,7 @@ module object_buffer
         color: '{red: 100, green: 100, blue: 100},
         depth: 1
     };
+    write_cursor = 1;
   end
 
 endmodule

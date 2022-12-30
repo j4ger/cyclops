@@ -131,24 +131,5 @@ module cyclops_top
     end
   endgenerate
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 endmodule
 

@@ -54,21 +54,31 @@ module object_buffer
   end
 
   initial begin
-    mem[0] = '{
-        a: '{x: 10, y: 10},
-        b: '{x: 100, y: 15},
-        c: '{x: 50, y: 75},
-        color: '{red: 100, green: 100, blue: 100},
-        depth: 1
-    };
-    mem[1] = '{
-        a: '{x: 500, y: 100},
-        b: '{x: 600, y: 100},
-        c: '{x: 600, y: 300},
-        color: '{red: 7, green: 88, blue: 48},
-        depth: 2
-    };
-    write_cursor = 2;
+    vertex_t a = '{200, 50};
+    vertex_t b = '{50, 200};
+    vertex_t c = '{100, 250};
+    vertex_t d = '{300, 250};
+    vertex_t e = '{350, 200};
+    vertex_t f = '{200, 400};
+    vertex_t g = '{40, 300};
+    vertex_t h = '{500, 50};
+    vertex_t i = '{450, 300};
+
+    color_t  c1 = 'hCBEDD5;
+    color_t  c2 = 'h97DECE;
+    color_t  c3 = 'h62B6B7;
+    color_t  c4 = 'h439A97;
+    color_t  c5 = 'hFC8210;
+
+    mem[0] = '{a, b, c, c3, 1};
+    mem[1] = '{a, c, d, c1, 1};
+    mem[2] = '{a, d, e, c3, 1};
+    mem[3] = '{b, c, f, c4, 1};
+    mem[4] = '{c, d, f, c2, 1};
+    mem[5] = '{d, e, f, c4, 1};
+    mem[6] = '{g, h, i, c5, 7};
+
+    write_cursor = 7;
   end
 
 endmodule

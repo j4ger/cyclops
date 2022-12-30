@@ -24,8 +24,8 @@ module display_buffer_mux
   pixel_t display_buffer_1[524288];
   pixel_t display_buffer_2[524288];
 
-  initial $readmemh("./resources/xiaoke.hex", display_buffer_1);
-  initial $readmemh("./resources/quin.hex", display_buffer_2);
+  initial $readmemh("./resources/buffer1.hex", display_buffer_1);
+  initial $readmemh("./resources/buffer2.hex", display_buffer_2);
 
   logic current_buffer;  // 0 for buffer_1, 1 for buffer_2
 

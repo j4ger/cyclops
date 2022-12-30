@@ -34,14 +34,15 @@ module rasterizer
     calc_d2 = 6,
     wait_for_d2 = 7,
     calc_complete = 8,
-    complete = 9
+    write = 9,
+    cursor_move = 10
   } rasterizer_state_t;
 
   rasterizer_state_t state, next_state;
 
   logic multiplier_start, multiplier_complete;
 
-  assign multiplier_start = (state != idle) && (state != complete);
+  assign multiplier_start = (state != idle) && (state != write) && (state != cursor_move);
 
   logic signed [21:0] s, d, t, s1, s2, d1, d2, t1, t2, sum_st;
 
@@ -66,8 +67,6 @@ module rasterizer
       .valid(multiplier_complete)
   );
 
-  logic written;
-
   always_ff @(posedge clock or posedge reset) begin
     if (reset) begin
       current_x <= X_RANGE_START[9:0];
@@ -82,13 +81,13 @@ module rasterizer
       mul_a <= 0;
       mul_b <= 0;
       data_write <= 0;
-      written <= 1;
       task_complete <= 0;
     end else begin
       state <= next_state;
 
-      if (output_written) written <= 1;
-
+      if (output_written) begin
+        data_write <= 0;
+      end
       if (next_task || switch_buffer) begin
         task_complete <= 0;
         current_x <= X_RANGE_START[9:0];
@@ -138,10 +137,10 @@ module rasterizer
           d2 <= mul_c;
           if (cursor_at_end) task_complete <= 1;
         end
-        complete: begin
+        write: begin
           //          $display("setting output for (%d, %d)", current_x, current_y);
           // write result if needed
-          if (in_triangle & written) begin
+          if (!data_write) begin
             //           $display("writing");
             data_write <= 1;
             data_out <= '{
@@ -154,9 +153,9 @@ module rasterizer
                     depth: current_task.depth
                 }
             };
-            written <= 0;
-          end else data_write <= 0;
-          // move cursor
+          end
+        end
+        cursor_move: begin
           if (!cursor_at_end) begin
             if (current_y == HEIGHT) begin
               current_y <= 0;
@@ -171,17 +170,18 @@ module rasterizer
 
   always_comb begin
     unique case (state)
-      default: next_state = idle;
-      idle: next_state = (next_task || switch_buffer) ? calc_s1 : idle;
-      calc_s1: next_state = multiplier_complete ? calc_s2 : calc_s1;
-      calc_s2: next_state = multiplier_complete ? calc_t1 : calc_s2;
-      calc_t1: next_state = multiplier_complete ? calc_t2 : calc_t1;
-      calc_t2: next_state = multiplier_complete ? calc_d1 : calc_t2;
-      calc_d1: next_state = multiplier_complete ? calc_d2 : calc_d1;
-      calc_d2: next_state = multiplier_complete ? wait_for_d2 : calc_d2;
-      wait_for_d2: next_state = multiplier_complete ? calc_complete : wait_for_d2;
-      calc_complete: next_state = complete;
-      complete: next_state = (!written) ? complete : (task_complete ? idle : calc_s1);
+      default:       next_state = idle;
+      idle:          next_state = (next_task || switch_buffer) ? calc_s1 : idle;
+      calc_s1:       next_state = multiplier_complete ? calc_s2 : calc_s1;
+      calc_s2:       next_state = multiplier_complete ? calc_t1 : calc_s2;
+      calc_t1:       next_state = multiplier_complete ? calc_t2 : calc_t1;
+      calc_t2:       next_state = multiplier_complete ? calc_d1 : calc_t2;
+      calc_d1:       next_state = multiplier_complete ? calc_d2 : calc_d1;
+      calc_d2:       next_state = multiplier_complete ? wait_for_d2 : calc_d2;
+      wait_for_d2:   next_state = multiplier_complete ? calc_complete : wait_for_d2;
+      calc_complete: next_state = in_triangle ? write : cursor_move;
+      write:         next_state = data_write ? write : cursor_move;
+      cursor_move:   next_state = task_complete ? idle : calc_s1;
     endcase
   end
 

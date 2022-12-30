@@ -64,9 +64,8 @@ module depth_comparator
 
             address_x <= input_data[current_index].x;
             address_y <= input_data[current_index].y;
-            write_enable <= 0;
-
           end
+          write_enable <= 0;
         end
         write: begin
           written[current_index] <= 1;

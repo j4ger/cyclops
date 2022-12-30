@@ -15,7 +15,7 @@ module cyclops_top
     VGA_B
 );
 
-  localparam logic [7:0] UNITS = 1;
+  localparam logic [7:0] UNITS = 64;
   localparam int STEP = 640 / {24'b0, UNITS};
 
   logic [9:0] dbm_address_a_x, dbm_address_a_y, dbm_address_b_x, dbm_address_b_y;
